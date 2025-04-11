@@ -1,0 +1,53 @@
+- name: Deploy Next.js App via Docker
+  hosts: webserver
+  become: yes
+  vars:
+    app_name: nextjs-app
+    docker_image: nextjs-app:latest
+    docker_container: nextjs-app
+    app_port: 3000
+    app_path: /opt/nextjs-app
+
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Create app directory
+      file:
+        path: "{{ app_path }}"
+        state: directory
+
+    - name: Copy Next.js app to server
+      copy:
+        src: .
+        dest: "{{ app_path }}"
+        exclude: ['node_modules', '.next']
+
+    - name: Build Docker image
+      community.docker.docker_image:
+        build:
+          path: "{{ app_path }}"
+        name: "{{ docker_image }}"
+
+    - name: Stop existing container if running
+      community.docker.docker_container:
+        name: "{{ docker_container }}"
+        state: absent
+        force_kill: true
+
+    - name: Run Docker container
+      community.docker.docker_container:
+        name: "{{ docker_container }}"
+        image: "{{ docker_image }}"
+        ports:
+          - "3000:{{ app_port }}"
+        restart_policy: always

@@ -1,0 +1,53 @@
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.log
+
+# Build output
+.next/
+out/
+
+# Static exports
+out/
+
+# Vercel deployments
+.vercel/
+
+# Local env files
+.env*
+!.env.example
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# IDEs & editors
+.vscode/
+.idea/
+*.sw?
+
+# Dependency directories
+.pnp/
+.pnp.js
+
+# Optional npm cache directory
+.npm/
+
+# Output of 'next export'
+out/
+
+# Coverage
+coverage/
+
+# Testing
+jest-test-results.json
+
+# Misc
+*.local
+*.lock-wscript
+*.tsbuildinfo
