@@ -9,34 +9,58 @@
     app_path: /opt/nextjs-app
 
   tasks:
-    - name: Ensure Docker is installed
-      apt:
-        name: docker.io
-        state: present
-        update_cache: yes
+    - name: Update Homebrew (macOS)
+      community.general.homebrew:
+        update_homebrew: yes
+      when: ansible_facts['os_family'] == 'Darwin'
+      become: false
 
-    - name: Ensure Docker service is running
-      service:
+    - name: Check if Docker Desktop is already installed (macOS)
+      stat:
+        path: /Applications/Docker.app
+      register: docker_app_installed
+      when: ansible_facts['os_family'] == 'Darwin'
+
+    - name: Ensure Docker is installed
+      community.general.homebrew_cask:
         name: docker
-        state: started
-        enabled: yes
+        state: present
+        update_homebrew: yes
+      when: 
+        - ansible_facts['os_family'] == 'Darwin'
+        - not docker_app_installed.stat.exists
+      become: false
+
+    # - name: Ensure Docker service is running
+    #   service:
+    #     name: docker
+    #     state: started
+    #     enabled: yes
 
     - name: Create app directory
       file:
         path: "{{ app_path }}"
         state: directory
 
-    - name: Copy Next.js app to server
-      copy:
-        src: .
-        dest: "{{ app_path }}"
-        exclude: ['node_modules', '.next']
+    # - name: Copy Next.js app to server (excluding node_modules)
+    #   ansible.posix.synchronize:
+    #     src: .
+    #     dest: .
+    #     rsync_opts:
+    #       - "--exclude=node_modules"
+    #   delegate_to: localhost
+
 
     - name: Build Docker image
       community.docker.docker_image:
+        name: nextjs-app
+        tag: latest
+        force_source: true
+        source: build
         build:
-          path: "{{ app_path }}"
-        name: "{{ docker_image }}"
+          path: /Users/neerajwadhwani/Downloads/nextjs_ansible_docker
+      delegate_to: localhost
+
 
     - name: Stop existing container if running
       community.docker.docker_container:
