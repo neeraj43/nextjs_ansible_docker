@@ -51,14 +51,14 @@
     #   delegate_to: localhost
 
 
-    - name: Build Docker image
+    - name: Build Docker image (path - your code path with docker file)
       community.docker.docker_image:
         name: nextjs-app
         tag: latest
         force_source: true
         source: build
         build:
-          path: /Users/neerajwadhwani/Downloads/nextjs_ansible_docker
+          path: ./
       delegate_to: localhost
 
 
